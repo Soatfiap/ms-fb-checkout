@@ -1,7 +1,10 @@
 <h1 align="center">
     < 📜 > <br>
- PÓS TECH - SOFTWARE ARCHITECTURE
+ Micro serviço de Checkout
 </h1>
+ <h2 align="center">
+ PÓS TECH - SOFTWARE ARCHITECTURE
+</h2>   
     <h2 align="center">
       <img src="https://postech.fiap.com.br/svg/fiap-plus-alura.svg">
     </h2>
