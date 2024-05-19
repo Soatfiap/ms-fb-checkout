@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/checkout")
-@Tag(name = "Checkout Controller Rest")
+@Tag(name = "Checkout Controller Rest MS-FB")
 public class CheckoutController {
     private final CheckoutContract mercadoPagoCheckout;
 

@@ -1,4 +1,4 @@
-package net.fiap.postech.fastburger.adapters.feignClients;
+package net.fiap.postech.fastburger.adapters.feignClients.mercadopago;
 
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PayerDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
@@ -6,7 +6,6 @@ import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentRequestDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.OrderDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentMethodDTO;
 import net.fiap.postech.fastburger.application.domain.Client;
-import net.fiap.postech.fastburger.application.ports.inputports.client.FindClientByCpfGateway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,9 @@ public class MercadoPagoService {
 
     @Value("${MERCADO_TOKEN}")
     private String bearerToken;
-    private final FindClientByCpfGateway findClientByCpfGateway;
     private final MercadoPagoFeignClient mercadoPagoFeignClient;
 
-    public MercadoPagoService(FindClientByCpfGateway findClientByCpfGateway, MercadoPagoFeignClient mercadoPagoFeignClient) {
-        this.findClientByCpfGateway = findClientByCpfGateway;
+    public MercadoPagoService(MercadoPagoFeignClient mercadoPagoFeignClient) {
         this.mercadoPagoFeignClient = mercadoPagoFeignClient;
     }
 
@@ -31,7 +28,7 @@ public class MercadoPagoService {
         generateDescription(orderDTO, paymentRequestDTO);
 
         if (orderDTO.getClientCPF() != null) {
-            client = this.findClientByCpfGateway.find(orderDTO.getClientCPF());
+            client = null;
             payerDTO.setEmail(client.getEmail());
             payerDTO.setFirst_name(splitNome(client.getNome(), 1L));
             payerDTO.setLastName(splitNome(client.getNome(), 0L));

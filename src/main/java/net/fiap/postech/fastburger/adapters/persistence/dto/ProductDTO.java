@@ -1,7 +1,4 @@
 package net.fiap.postech.fastburger.adapters.persistence.dto;
-
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +20,6 @@ public class ProductDTO {
     private String name;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     private CategoryEnum categoryEnum;
 
     @NotNull

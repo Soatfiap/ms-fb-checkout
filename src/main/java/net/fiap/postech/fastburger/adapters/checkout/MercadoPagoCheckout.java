@@ -1,19 +1,17 @@
 package net.fiap.postech.fastburger.adapters.checkout;
 
 import net.fiap.postech.fastburger.adapters.configuration.authentication.AuthenticationService;
-import net.fiap.postech.fastburger.adapters.configuration.exceptionHandler.BusinessException;
-import net.fiap.postech.fastburger.adapters.feignClients.MercadoPagoService;
+import net.fiap.postech.fastburger.adapters.feignClients.mercadopago.MercadoPagoService;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDataProcess;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentStatus;
+import net.fiap.postech.fastburger.adapters.feignClients.order.MsFbOrderFeignClientService;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentDataDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentMethodDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.enumerations.PayMentMethodEnum;
 import net.fiap.postech.fastburger.adapters.persistence.mapper.OrderMapper;
 import net.fiap.postech.fastburger.application.domain.Order;
 import net.fiap.postech.fastburger.application.domain.enums.StatusOrder;
-import net.fiap.postech.fastburger.application.ports.inputports.order.ListOrderByNumberGateway;
-import net.fiap.postech.fastburger.application.ports.inputports.order.UpdateOrderGetway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +21,16 @@ import java.util.Date;
 @Service
 public class MercadoPagoCheckout implements CheckoutContract {
     private final MercadoPagoService mercadoPagoService;
-
-    private final AuthenticationService authenticationService;
+    private final MsFbOrderFeignClientService msFbOrderFeignClientService;
     private final OrderMapper orderMapper;
-    private final UpdateOrderGetway updateOrderGetway;
-    private final ListOrderByNumberGateway listOrderByNumberGateway;
 
     @Autowired
-    public MercadoPagoCheckout(MercadoPagoService mercadoPagoService, AuthenticationService authenticationService, OrderMapper orderMapper, UpdateOrderGetway updateOrderGetway, ListOrderByNumberGateway listOrderByNumberGateway) {
+    public MercadoPagoCheckout(MercadoPagoService mercadoPagoService,
+                               AuthenticationService authenticationService, MsFbOrderFeignClientService msFbOrderFeignClientService, OrderMapper orderMapper
+                               ) {
         this.mercadoPagoService = mercadoPagoService;
-        this.authenticationService = authenticationService;
+        this.msFbOrderFeignClientService = msFbOrderFeignClientService;
         this.orderMapper = orderMapper;
-        this.updateOrderGetway = updateOrderGetway;
-        this.listOrderByNumberGateway = listOrderByNumberGateway;
     }
 
     public PaymentDataDTO payOrder(String orderNumber, PaymentMethodDTO paymentMethodDTO) {
@@ -46,15 +41,14 @@ public class MercadoPagoCheckout implements CheckoutContract {
     public PaymentStatus paymentStatys(String orderNumber) {
         return PaymentStatus.builder()
                 .orderId(orderNumber)
-                .paymentWasApproved(this.listOrderByNumberGateway.listByNumber(orderNumber).getWasPaid())
+                .paymentWasApproved(this.msFbOrderFeignClientService.findOrderByNumber(orderNumber).getWasPaid())
                 .build();
     }
 
     @Override
     public void processFallbackPayment(PaymentDataProcess paymentDataProcess, String token) {
-        Order order = this.listOrderByNumberGateway.listByNumber(paymentDataProcess.getOrderId());
-        order.setWasPaid(paymentDataProcess.isPaymentWasApproved());
-        Order update = this.updateOrderGetway.update(paymentDataProcess.getOrderId(), order);
+        Order order = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.findOrderByNumber(paymentDataProcess.getOrderId()));
+        Order update = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(paymentDataProcess.getOrderId(), true));
     }
 
     private PaymentDataDTO getPaymentDataDTO(String orderNumber, PaymentMethodDTO paymentMethodDTO) {
@@ -81,16 +75,16 @@ public class MercadoPagoCheckout implements CheckoutContract {
         } else {
             paymentDataDTO = payWithPixOrCard(orderNumber, paymentMethodDTO);
         }
+        this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true));
         return paymentDataDTO;
     }
 
     private PaymentDataDTO payWithPixOrCard(String orderNumber, PaymentMethodDTO paymentMethodDTO) {
         PaymentDTO paymentDTO;
         try {
-            Order order = this.listOrderByNumberGateway.listByNumber(orderNumber);
+            Order order = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.findOrderByNumber(orderNumber));
             order.setStatus(StatusOrder.INPREPARATION);
-            order.setWasPaid(true);
-            Order update = this.updateOrderGetway.update(orderNumber, order);
+            Order update = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true));
             paymentDTO = this.mercadoPagoService.generateQRCode(this.orderMapper.orderToOrderDTO(order), paymentMethodDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);

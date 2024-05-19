@@ -6,9 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableFeignClients
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Challenge Pos Tech - Fiap", description = "Desafio Pos Tech Arquitetura de Software (SOAT-04) G44", version = "1.0.0"))
+@OpenAPIDefinition(info = @Info(title = "Challenge Pos Tech - Fiap MS de Checkout", description = "Desafio Pos Tech Arquitetura de Software (SOAT-04) G44", version = "1.0.0"))
+@EnableFeignClients
 public class FastburgerApplication {
 
     public static void main(String[] args) {

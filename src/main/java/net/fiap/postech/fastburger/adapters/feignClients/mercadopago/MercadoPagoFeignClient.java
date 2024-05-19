@@ -1,4 +1,4 @@
-package net.fiap.postech.fastburger.adapters.feignClients;
+package net.fiap.postech.fastburger.adapters.feignClients.mercadopago;
 
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentRequestDTO;
