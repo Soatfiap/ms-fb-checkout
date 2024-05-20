@@ -16,6 +16,13 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <sonar.organization>soatfiapg44</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.exclusions>**/net/fiap/postech/fastburger/application/domain/**/*,
+            **/net/fiap/postech/fastburger/adapters/**/*,
+            **/net/fiap/postech/fastburger/application/ports/**/*,
+            **/net/fiap/postech/fastburger/FastburgerApplication.java,
+        </sonar.exclusions>
     </properties>
     <dependencyManagement>
         <dependencies>
