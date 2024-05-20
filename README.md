@@ -33,4 +33,4 @@ que é composto por uma série de dispositivos e interfaces que permitem aos cli
 <p/>
 
 ### 📚  [Como executar a aplicação](HELP.md)
-
+<!-- Just a comment to validate sonarqube 001 -->
