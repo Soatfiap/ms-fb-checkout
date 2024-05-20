@@ -36,6 +36,9 @@ public class ProductUseCase implements SaveProductGateway, UpdateProductGateway,
 
     @Override
     public Product save(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null");
+        }
         if (product.getPrice() <= 0) {
             throw new BusinessException("O valor do produto não pode ser igual ou menor que zero!");
         }
