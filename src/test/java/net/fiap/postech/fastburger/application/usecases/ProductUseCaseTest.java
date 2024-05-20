@@ -1,5 +1,6 @@
 package net.fiap.postech.fastburger.application.usecases;
 
+import net.fiap.postech.fastburger.adapters.configuration.exceptionHandler.BusinessException;
 import net.fiap.postech.fastburger.application.domain.Product;
 import net.fiap.postech.fastburger.application.domain.enums.CategoryEnum;
 import net.fiap.postech.fastburger.application.ports.outputports.product.*;
@@ -63,5 +64,34 @@ class ProductUseCaseTest {
         var products = productUseCase.find(categoryEnum);
         assertFalse(products.isEmpty());
         assertEquals(product, products.get(0));
+    }
+
+    @Test
+    void saveReturnsNull() {
+        Product product = new Product();
+        product.setPrice(10.0);
+        when(saveProductOutPutPort.save(any())).thenReturn(null);
+        Product savedProduct = productUseCase.save(product);
+        assertNull(savedProduct);
+    }
+
+    @Test
+    void saveThrowsException() {
+        Product product = new Product();
+        product.setPrice(10.0);
+        when(saveProductOutPutPort.save(any())).thenThrow(new RuntimeException());
+        assertThrows(RuntimeException.class, () -> productUseCase.save(product));
+    }
+
+    @Test
+    void saveWithNullProduct() {
+        assertThrows(IllegalArgumentException.class, () -> productUseCase.save(null));
+    }
+
+    @Test
+    void saveWithInvalidPrice() {
+        Product product = new Product();
+        product.setPrice(0.0);
+        assertThrows(BusinessException.class, () -> productUseCase.save(product));
     }
 }
