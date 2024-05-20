@@ -3,6 +3,7 @@ package net.fiap.postech.fastburger.adapters.feignClients.mercadopago;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PayerDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentRequestDTO;
+import net.fiap.postech.fastburger.adapters.feignClients.order.MsFbOrderFeignClientService;
 import net.fiap.postech.fastburger.adapters.persistence.dto.OrderDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentMethodDTO;
 import net.fiap.postech.fastburger.application.domain.Client;
@@ -16,24 +17,30 @@ public class MercadoPagoService {
     @Value("${MERCADO_TOKEN}")
     private String bearerToken;
     private final MercadoPagoFeignClient mercadoPagoFeignClient;
+    private final MsFbOrderFeignClientService msFbClientFeignClientService;
 
-    public MercadoPagoService(MercadoPagoFeignClient mercadoPagoFeignClient) {
+    public MercadoPagoService(MercadoPagoFeignClient mercadoPagoFeignClient, MsFbOrderFeignClientService msFbClientFeignClientService) {
         this.mercadoPagoFeignClient = mercadoPagoFeignClient;
+        this.msFbClientFeignClientService = msFbClientFeignClientService;
     }
 
     public PaymentDTO generateQRCode(OrderDTO orderDTO, PaymentMethodDTO paymentMethodDTO) {
         Client client = null;
         PayerDTO payerDTO = new PayerDTO();
-        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(orderDTO.getTotalValue().doubleValue(), paymentMethodDTO.getMethod().name().toLowerCase(), payerDTO);
+        PaymentRequestDTO paymentRequestDTO = null;
+        if (orderDTO.getTotalValue() == null) {
+            paymentRequestDTO = new PaymentRequestDTO(paymentMethodDTO.getMethod().name().toLowerCase(), payerDTO);
+        } else {
+            paymentRequestDTO = new PaymentRequestDTO(orderDTO.getTotalValue().doubleValue(), paymentMethodDTO.getMethod().name().toLowerCase(), payerDTO);
+        }
         generateDescription(orderDTO, paymentRequestDTO);
 
         if (orderDTO.getClientCPF() != null) {
-            client = null;
-            payerDTO.setEmail(client.getEmail());
-            payerDTO.setFirst_name(splitNome(client.getNome(), 1L));
-            payerDTO.setLastName(splitNome(client.getNome(), 0L));
+            payerDTO.setEmail("4soatg44@gmail.com");
+            payerDTO.setFirst_name("fastburger - data preservation");
+            payerDTO.setLastName("fastburger - data preservation");
         } else {
-            payerDTO.setEmail("fastburger@fiap.com");
+            payerDTO.setEmail("4soatg44@gmail.com");
             payerDTO.setFirst_name("fastburger - not informed");
             payerDTO.setLastName("fastburger - not informed");
         }

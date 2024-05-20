@@ -32,7 +32,7 @@ public class MsFbOrderFeignClientService implements IMsFbOrderFeignClient {
 
     @Override
     public OrderDTO updateStatusOrder(String orderNumber, Boolean wasPaid) {
-        return (OrderDTO) this.msFbOrderFeignClient.updateStatusOrder(orderNumber, wasPaid).getBody();
+        return this.msFbOrderFeignClient.updateStatusOrder(orderNumber, wasPaid).getBody();
     }
 
 }

@@ -6,6 +6,7 @@ import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDataProcess;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentStatus;
 import net.fiap.postech.fastburger.adapters.feignClients.order.MsFbOrderFeignClientService;
+import net.fiap.postech.fastburger.adapters.persistence.dto.OrderDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentDataDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentMethodDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.enumerations.PayMentMethodEnum;
@@ -75,7 +76,8 @@ public class MercadoPagoCheckout implements CheckoutContract {
         } else {
             paymentDataDTO = payWithPixOrCard(orderNumber, paymentMethodDTO);
         }
-        this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true));
+        OrderDTO orderDTO = this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true);
+        this.orderMapper.orderDTOToOrder(orderDTO);
         return paymentDataDTO;
     }
 

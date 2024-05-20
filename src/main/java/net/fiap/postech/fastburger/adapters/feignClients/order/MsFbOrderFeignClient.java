@@ -33,6 +33,6 @@ public interface MsFbOrderFeignClient {
     @DeleteMapping("/api/v1/order/{orderNumber}")
     ResponseEntity<Void> deleteOrderByNumber(@PathVariable("orderNumber") String orderNumber);
 
-    @PutMapping("/order/status/{orderNumber}/{wasPaid}")
-    ResponseEntity updateStatusOrder(@PathVariable("orderNumber") String orderNumber, @PathVariable("wasPaid") Boolean wasPaid);
+    @PutMapping("/api/v1/order/order/status/{orderNumber}/{wasPaid}")
+    ResponseEntity<OrderDTO> updateStatusOrder(@PathVariable("orderNumber") String orderNumber, @PathVariable("wasPaid") Boolean wasPaid);
 }

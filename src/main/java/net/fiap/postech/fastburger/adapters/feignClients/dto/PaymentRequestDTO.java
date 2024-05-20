@@ -16,6 +16,12 @@ public class PaymentRequestDTO {
         this.payer = payerDTO;
     }
 
+    public PaymentRequestDTO(String payment_method_id, PayerDTO payerDTO) {
+        this.transaction_amount = 10.0;
+        this.payment_method_id = payment_method_id;
+        this.payer = payerDTO;
+    }
+
     @JsonProperty("transaction_amount")
     public double getTransactionAmount() {
         return transaction_amount;
