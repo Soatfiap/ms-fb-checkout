@@ -1,10 +1,7 @@
 version: "3.2"
 services:
   app:
-#    image: 4soatg44/challenge-fastburger:1.3.0
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: 4soatg44/ms-fb-checkout:1.0.0
     ports:
       - "8081:8080"
     environment:
