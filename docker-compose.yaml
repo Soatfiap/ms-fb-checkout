@@ -1,7 +1,10 @@
 version: "3.2"
 services:
   app:
-    image: 4soatg44/ms-fb-checkout:1.0.0
+#    image: 4soatg44/ms-fb-checkout:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8081:8080"
     environment:
@@ -14,7 +17,11 @@ services:
       MERCADO_API: "https://api.mercadopago.com"
       MS_FB_ORDER: "http://localhost:8080"
       MS_FB_CADASTRO: "http://localhost:8082"
-
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USERNAME: "guest"
+      RABBITMQ_PASSWORD: "guest"
+      RABBITMQ_QUEUE_NAME: "saga-payment-order"
     networks:
       - netChallenge
     restart: always
