@@ -1,18 +1,19 @@
 package net.fiap.postech.fastburger.adapters.checkout;
 
+import net.fiap.postech.fastburger.adapters.checkout.dto.PayMentProcess;
 import net.fiap.postech.fastburger.adapters.configuration.authentication.AuthenticationService;
 import net.fiap.postech.fastburger.adapters.feignClients.mercadopago.MercadoPagoService;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDTO;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentDataProcess;
 import net.fiap.postech.fastburger.adapters.feignClients.dto.PaymentStatus;
 import net.fiap.postech.fastburger.adapters.feignClients.order.MsFbOrderFeignClientService;
-import net.fiap.postech.fastburger.adapters.persistence.dto.OrderDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentDataDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.PaymentMethodDTO;
 import net.fiap.postech.fastburger.adapters.persistence.dto.enumerations.PayMentMethodEnum;
 import net.fiap.postech.fastburger.adapters.persistence.mapper.OrderMapper;
 import net.fiap.postech.fastburger.application.domain.Order;
 import net.fiap.postech.fastburger.application.domain.enums.StatusOrder;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +25,21 @@ public class MercadoPagoCheckout implements CheckoutContract {
     private final MercadoPagoService mercadoPagoService;
     private final MsFbOrderFeignClientService msFbOrderFeignClientService;
     private final OrderMapper orderMapper;
+    private final RabbitTemplate rabbitTemplate;
 
     @Autowired
     public MercadoPagoCheckout(MercadoPagoService mercadoPagoService,
-                               AuthenticationService authenticationService, MsFbOrderFeignClientService msFbOrderFeignClientService, OrderMapper orderMapper
-                               ) {
+                               AuthenticationService authenticationService, MsFbOrderFeignClientService msFbOrderFeignClientService, OrderMapper orderMapper, RabbitTemplate rabbitTemplate
+    ) {
         this.mercadoPagoService = mercadoPagoService;
         this.msFbOrderFeignClientService = msFbOrderFeignClientService;
         this.orderMapper = orderMapper;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public PaymentDataDTO payOrder(String orderNumber, PaymentMethodDTO paymentMethodDTO) {
+        PayMentProcess process = new PayMentProcess(orderNumber, paymentMethodDTO.getMethod().getType(), true);
+        this.rabbitTemplate.convertAndSend("orderExchange", "order.created", process.toString());
         return getPaymentDataDTO(orderNumber, paymentMethodDTO);
     }
 
@@ -76,8 +81,6 @@ public class MercadoPagoCheckout implements CheckoutContract {
         } else {
             paymentDataDTO = payWithPixOrCard(orderNumber, paymentMethodDTO);
         }
-        OrderDTO orderDTO = this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true);
-        this.orderMapper.orderDTOToOrder(orderDTO);
         return paymentDataDTO;
     }
 
@@ -86,7 +89,6 @@ public class MercadoPagoCheckout implements CheckoutContract {
         try {
             Order order = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.findOrderByNumber(orderNumber));
             order.setStatus(StatusOrder.INPREPARATION);
-            Order update = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(orderNumber, true));
             paymentDTO = this.mercadoPagoService.generateQRCode(this.orderMapper.orderToOrderDTO(order), paymentMethodDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);

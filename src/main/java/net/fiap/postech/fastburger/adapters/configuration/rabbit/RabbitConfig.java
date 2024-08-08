@@ -17,7 +17,7 @@ public class RabbitConfig {
 
     private static final String ORDER_EXCHANGE = "orderExchange";
     private static final String ORDER_CREATED_ROUTING_KEY = "order.created";
-    private static final String ORDER_CREATED_QUEUE = "${fastburger.rabbitmq.queue.order-created}";
+    private static final String ORDER_CREATED_QUEUE = "saga-payment-order";
 
     @Bean
     public TopicExchange orderExchange() {
