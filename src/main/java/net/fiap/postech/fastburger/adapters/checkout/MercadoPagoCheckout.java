@@ -53,6 +53,8 @@ public class MercadoPagoCheckout implements CheckoutContract {
 
     @Override
     public void processFallbackPayment(PaymentDataProcess paymentDataProcess, String token) {
+        PayMentProcess process = new PayMentProcess(paymentDataProcess.getOrderId(), null, paymentDataProcess.isPaymentWasApproved());
+        this.rabbitTemplate.convertAndSend("orderExchange", "order.created", process.toString());
         Order order = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.findOrderByNumber(paymentDataProcess.getOrderId()));
         Order update = this.orderMapper.orderDTOToOrder(this.msFbOrderFeignClientService.updateStatusOrder(paymentDataProcess.getOrderId(), true));
     }
